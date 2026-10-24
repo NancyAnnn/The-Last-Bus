@@ -1,0 +1,11 @@
+本文件夹用于放置正式美术素材，游戏会自动加载并替换占位画面。
+
+命名规范（见 美术风格规范_ART_STYLE_GUIDE.md）：
+- 背景：bg_ruins.png / bg_ward.png / bg_hospital_door.png / bg_station.png /
+  bg_nurse_station.png / bg_street_rain.png / bg_bus_inside.png（1920×1080 PNG）
+- 角色：char_chenbo.png / char_chenbo_wet.png / char_linwan.png /
+  char_linwan_tidy.png / char_shuche.png / char_laozhou.png（透明背景 PNG）
+- 道具：prop_sprinkler.png / prop_light.png / prop_dispenser.png /
+  prop_folder.png / prop_lamp.png / prop_bell.png / prop_lunchbox.png（透明 PNG）
+
+缺失任何素材时，游戏自动用色板内的 SVG 占位，可正常运行。

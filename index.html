@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最后一班巴士</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="art.css">
+  <script src="levelData.js" defer></script>
+  <script src="story.js" defer></script>
+  <script src="itemInfo.js" defer></script>
+  <script src="busFinale.js" defer></script>
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main id="game" aria-label="最后一班巴士">
+    <!-- 场景层：废墟主界面或记忆画面（由 game.js 生成内容） -->
+    <div id="stage"></div>
+    <!-- 雨（仅废墟显示） -->
+    <div id="rain" class="hidden" aria-hidden="true"></div>
+    <!-- 灵体：跟随鼠标，不拦截指针 -->
+    <div id="spirit" aria-hidden="true"><div id="spirit-shape"></div></div>
+    <!-- 记忆播放顶栏：人物 / 场景 / 时间 / 暂停 / 命运档案 -->
+    <div id="hud" class="hidden"></div>
+    <!-- 命运档案侧边栏 -->
+    <aside id="archive" aria-label="命运档案"></aside>
+    <!-- 记忆结束幕（阶段 3 起改为结算画面） -->
+    <div id="endveil" class="hidden"></div>
+    <!-- 底部提示 -->
+    <div id="toast" role="status" aria-live="polite"></div>
+  </main>
+</body>
+</html>

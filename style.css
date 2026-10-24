@@ -1,0 +1,237 @@
+﻿/* 色板锁定：全部色值集中在 :root 的 CSS 变量中定义，唯一依据《美术风格规范_ART_STYLE_GUIDE.md》§1。
+   下方规则禁止直接写 hex；需要新颜色 = 先改规范，再在这里加变量。 */
+:root {
+  --bg: #0f1624;          /* 背景 / 深蓝黑，每幅画面主色 */
+  --page-bg: #080d16;     /* 页面外背景 */
+  --shadow: #0a101c;      /* 深影（暗部大色块） */
+  --mid-blue: #263650;    /* 中景蓝（墙体/家具/车体） */
+  --warm-light: #e8d9a8;  /* 暖光（窗/灯罩/车灯，仅小面积） */
+  --rain: #3a4a63;        /* 雨线 / 细边框 */
+  --silhouette: #5a6475;  /* 灰色剪影（死者/未解锁） */
+  --spirit: #e8f4ff;      /* 灵体的光，全画面最亮 */
+  --chen: #f2b84b;        /* 陈伯 */
+  --xu: #4fc4b0;          /* 许澈 */
+  --lin: #b79ce0;         /* 林晚 / 事故链？？？高亮 */
+  --zhou: #e6694a;        /* 老周 */
+  --gray-struct: #697b8c; /* 占位灰·结构（占位 SVG、按钮边框） */
+  --gray-mid: #8997a4;    /* 占位灰·中（仅 stage-1 占位 SVG） */
+  --gray-line: #a1acb7;   /* 占位灰·描边 */
+  --panel: #121c2a;       /* 面板底 */
+  --panel-veil: rgba(18, 28, 42, 0.92);  /* --panel 同色加透明度 */
+  --bg-veil: rgba(15, 22, 36, 0.88);     /* --bg 同色加透明度 */
+  --btn: #233247;         /* 按钮底 */
+  --btn-hover: #30435c;   /* 按钮 hover */
+  --text-main: #e8f4ff;   /* 主文字 */
+  --text-sub: #aab6c7;    /* 次文字 */
+  --text-dim: #8694aa;    /* 弱文字 */
+  --glow: #e8f4ff70;      /* 灵体外发光 */
+  --glow-soft: #e8f4ff50; /* 靠近/可交互微光 */
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; background: var(--page-bg); color: var(--text-main); font-family: "Microsoft YaHei", sans-serif; }
+#game { position: relative; width: 1280px; height: 720px; overflow: hidden; background: var(--bg); transform-origin: center; user-select: none; touch-action: none; }
+/* 灵体即光标：游戏区域内隐藏系统光标（v3 §3.1 “灵体是游戏角色，不是普通鼠标指针”） */
+#game, #game * { cursor: none; }
+.hidden { display: none !important; }
+
+/* ========== 层级：场景 1 < 雨 2 < 灵体 3 < HUD 5 < 档案 6 < 结束幕 7 < 提示 9 ========== */
+#stage { position: absolute; inset: 0; z-index: 1; }
+
+/* ========== 雨（仅废墟；稀疏细线，禁止密集雨幕） ========== */
+#rain { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+#rain i { position: absolute; top: -180px; width: 1px; background: var(--rain); opacity: 0.5; transform: rotate(8deg); animation: rainfall 1.6s linear infinite; }
+@keyframes rainfall { to { transform: translate3d(70px, 920px, 0) rotate(8deg); } }
+
+/* ========== 灵体（沿用阶段 1 验证过的形态与手感） ========== */
+#spirit { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; }
+#spirit-shape { width: 34px; height: 34px; margin: -17px; border-radius: 50%; background: var(--spirit); box-shadow: 0 0 18px var(--glow); transform-origin: center; }
+
+/* ========== 人物剪影骨架（废墟与记忆共用；识别配件按概念设计板） ========== */
+.figure-wrap { position: absolute; bottom: 54px; width: 150px; margin-left: -75px; padding: 0; border: none; background: none; display: block; text-align: center; font: inherit; color: inherit; cursor: pointer; }
+/* 人物不是普通按钮：hover/聚焦时不出现背景块或方框，反馈只给剪影辉光 */
+.figure-wrap:hover, .figure-wrap:focus, .figure-wrap:focus-visible { background: none; box-shadow: none; outline: none; }
+.figure-wrap:focus-visible .figure { filter: drop-shadow(0 0 12px var(--glow-soft)); }
+.figure-name { display: block; margin-top: 12px; font-size: 15px; font-weight: 500; letter-spacing: 2px; color: var(--text-sub); }
+.figure-status { display: block; margin-top: 3px; font-size: 12px; letter-spacing: 1px; color: var(--text-dim); }
+.figure { position: relative; width: 56px; height: 170px; margin: 0 auto; }
+/* 废墟中的死者剪影：更透、浮动幅度更大，如幽灵般悬停 */
+.figure-wrap .figure { opacity: 0.62; animation: ghostFloat 4.2s ease-in-out infinite; }
+/* 剪影复色：--fig 变化时平滑过渡（阶段 4 颜色恢复） */
+.figure .head, .figure .torso, .figure .leg { transition: background-color 1.4s ease; }
+/* 同色光点（补充剂）：出现在复色剪影旁 */
+.orb-light { position: absolute; top: 30px; left: 100px; width: 12px; height: 12px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px 2px currentColor; opacity: 0; animation: orbIn 1.2s ease 0.9s forwards; }
+@keyframes orbIn { to { opacity: 0.95; } }
+.figure-wrap.restored .figure { opacity: 0.8; }
+/* 结算行的补充剂小点 */
+.orb-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.end-box p.orb-line { color: var(--text-main); }
+.end-box p.orb-line.dim { color: var(--text-dim); }
+@keyframes ghostFloat { 50% { transform: translateY(-10px); } }
+.figure .head { position: absolute; left: 50%; top: 0; width: 34px; height: 34px; margin-left: -17px; border-radius: 50%; background: var(--fig, var(--silhouette)); }
+.figure .torso { position: absolute; left: 50%; top: 30px; width: 52px; height: 92px; margin-left: -26px; border-radius: 26px 26px 12px 12px; background: var(--fig, var(--silhouette)); }
+.figure .leg { position: absolute; top: 116px; width: 11px; height: 50px; border-radius: 5px; background: var(--fig, var(--silhouette)); transform-origin: top center; }
+.figure .leg.l { left: 13px; }
+.figure .leg.r { left: 32px; }
+/* 走路：双腿摆动 */
+.figure.walking .leg.l { animation: stepL 0.7s ease-in-out infinite; }
+.figure.walking .leg.r { animation: stepR 0.7s ease-in-out infinite; }
+@keyframes stepL { 0%, 100% { transform: rotate(17deg); } 50% { transform: rotate(-17deg); } }
+@keyframes stepR { 0%, 100% { transform: rotate(-17deg); } 50% { transform: rotate(17deg); } }
+.figure.near { filter: drop-shadow(0 0 10px var(--glow-soft)); }
+/* 陈伯：怀里的饭盒 */
+.figure.chenbo .torso::after { content: ""; position: absolute; right: -16px; top: 86px; width: 22px; height: 16px; border-radius: 3px; background: var(--fig, var(--silhouette)); }
+/* 林晚：发髻 + 手中的病历夹 */
+.figure.linwan .head::after { content: ""; position: absolute; top: -9px; left: 50%; margin-left: -7px; width: 14px; height: 13px; border-radius: 8px 8px 3px 3px; background: var(--fig, var(--silhouette)); }
+.figure.linwan .torso::after { content: ""; position: absolute; right: -14px; top: 64px; width: 16px; height: 22px; border-radius: 2px; background: var(--fig, var(--silhouette)); opacity: 0.85; }
+/* 许澈：耳机 + 书包 */
+.figure.shuche .head::before, .figure.shuche .head::after { content: ""; position: absolute; top: 11px; width: 9px; height: 12px; border-radius: 3px; background: var(--fig, var(--silhouette)); }
+.figure.shuche .head::before { left: -8px; }
+.figure.shuche .head::after { right: -8px; }
+.figure.shuche .torso::before { content: ""; position: absolute; left: -12px; top: 8px; width: 16px; height: 64px; border-radius: 6px 6px 3px 3px; background: var(--fig, var(--silhouette)); opacity: 0.7; }
+/* 老周：司机大檐帽 */
+.figure.laozhou .head::after { content: ""; position: absolute; top: -7px; left: 50%; margin-left: -23px; width: 46px; height: 9px; border-radius: 4px; background: var(--fig, var(--silhouette)); }
+
+/* ========== 废墟主界面 ========== */
+#stage > header { position: absolute; left: 54px; top: 42px; }
+#stage > header h1 { margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 4px; color: var(--text-main); }
+#stage > header p { margin: 8px 0 0; font-size: 13px; letter-spacing: 2px; color: var(--text-dim); }
+.screen-tip { position: absolute; left: 54px; bottom: 44px; margin: 0; font-size: 15px; letter-spacing: 1px; color: var(--text-dim); }
+.screen-meta { position: absolute; left: 54px; bottom: 22px; margin: 0; font-size: 12px; letter-spacing: 1px; color: var(--text-dim); opacity: 0.75; }
+.ph-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; background: var(--shadow); border-top: 2px solid var(--rain); }
+/* 翻倒的巴士（占位色块，正式素材为 bg_ruins.png） */
+.ph-bus { position: absolute; right: 56px; bottom: 118px; width: 430px; height: 150px; background: var(--mid-blue); border-radius: 24px 70px 24px 34px; transform: rotate(-7deg); }
+.ph-bus .bus-win { position: absolute; top: 30px; width: 70px; height: 36px; border-radius: 6px; background: var(--shadow); }
+.ph-bus .bus-win:nth-child(1) { left: 64px; }
+.ph-bus .bus-win:nth-child(2) { left: 176px; }
+
+/* ========== 记忆画面 ========== */
+.scene { position: absolute; inset: 0; animation: sceneIn 0.35s ease-out; }
+@keyframes sceneIn { from { opacity: 0; } }
+.scene-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* 场景插画 SVG 铺满场景层 */
+.scene-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 记忆中的人物为彩色（活着）；底部中心锚点定位 */
+.scene .figure { position: absolute; transform: translate(-50%, -100%); }
+.scene .figure.alive { animation: breathe 3.4s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: translate(-50%, -100%) translateY(2px); } }
+.scene.frozen .figure.alive { animation-play-state: paused; }
+.scene.frozen .clue { animation-play-state: paused; }
+
+/* ========== 线索 ========== */
+.clue { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; padding: 0; border: none; border-radius: 0; background: var(--spirit); opacity: 0.85; transform: rotate(45deg); box-shadow: 0 0 12px var(--glow-soft); cursor: pointer; animation: cluePulse 1.8s ease-in-out infinite; }
+.clue::after { content: ""; position: absolute; inset: -11px; } /* 扩大点击热区 */
+.clue:hover { opacity: 1; }
+.clue:focus-visible { outline: none; box-shadow: 0 0 14px var(--glow); }
+.clue.found { background: var(--silhouette); opacity: 0.45; box-shadow: none; animation: none; cursor: default; }
+@keyframes cluePulse { 0%, 100% { transform: rotate(45deg) scale(1); opacity: 0.7; } 50% { transform: rotate(45deg) scale(1.35); opacity: 1; } }
+
+/* ========== 记忆播放顶栏 ========== */
+#hud { position: absolute; left: 0; right: 0; top: 0; height: 62px; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; background: var(--panel-veil); border-bottom: 1px solid var(--rain); }
+.hud-left { display: flex; align-items: center; gap: 14px; }
+.hud-dot { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 8px var(--glow-soft); }
+.hud-left strong { font-size: 17px; font-weight: 500; letter-spacing: 3px; color: var(--text-main); }
+.hud-scene { font-size: 13px; letter-spacing: 1px; color: var(--text-dim); }
+.hud-right { display: flex; align-items: center; gap: 12px; }
+.hud-time { margin-right: 8px; font-size: 21px; letter-spacing: 3px; color: var(--text-main); font-variant-numeric: tabular-nums; }
+#hud button { padding: 7px 16px; font-size: 14px; }
+
+/* ========== 命运档案 ========== */
+#archive { position: absolute; right: 0; top: 62px; bottom: 0; width: 370px; z-index: 6; display: flex; flex-direction: column; background: var(--panel); border-left: 1px solid var(--rain); transform: translateX(100%); transition: transform 0.25s ease; }
+#archive.open { transform: translateX(0); }
+#archive header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--rain); }
+#archive header strong { font-size: 16px; font-weight: 500; letter-spacing: 3px; color: var(--text-main); }
+#archive .archive-close { padding: 4px 12px; font-size: 16px; }
+.archive-body { flex: 1; overflow-y: auto; padding: 8px 0 18px; }
+.archive-body h3 { margin: 16px 22px 8px; font-size: 13px; font-weight: 500; letter-spacing: 2px; color: var(--text-dim); }
+.archive-body ul { list-style: none; margin: 0; padding: 0; }
+.archive-body li { padding: 10px 22px 12px; border-bottom: 1px solid var(--shadow); }
+.archive-body li.empty { border-bottom: none; font-size: 13px; color: var(--text-dim); }
+.archive-body li .when { display: block; margin-bottom: 3px; font-size: 12px; color: var(--text-dim); }
+.archive-body li strong { font-size: 14px; font-weight: 500; letter-spacing: 1px; color: var(--text-main); }
+.archive-body li p { margin: 5px 0 0; font-size: 13px; line-height: 1.7; color: var(--text-sub); }
+
+/* ========== 记忆结束幕（阶段 3 起改为结算画面） ========== */
+#endveil { position: absolute; inset: 0; z-index: 7; display: grid; place-items: center; background: var(--bg-veil); animation: sceneIn 0.5s; }
+.end-box { text-align: center; }
+.end-box h2 { margin: 0 0 14px; font-size: 26px; font-weight: 500; letter-spacing: 6px; color: var(--text-main); }
+.end-box p { margin: 0 0 12px; font-size: 14px; letter-spacing: 1px; line-height: 1.8; color: var(--text-sub); }
+.end-box p:first-of-type { color: var(--text-dim); }
+.end-btns { display: flex; gap: 14px; justify-content: center; margin-top: 26px; }
+
+/* ========== 底部提示 ========== */
+#toast { position: absolute; left: 50%; bottom: 44px; z-index: 9; max-width: 660px; padding: 12px 24px; background: var(--panel-veil); border: 1px solid var(--rain); color: var(--text-sub); font-size: 15px; line-height: 1.7; text-align: center; pointer-events: none; opacity: 0; transform: translateX(-50%) translateY(10px); transition: opacity 0.25s, transform 0.25s; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ========== 灵力计量（圆点，符合概念板 UI） ========== */
+.hud-energy { display: flex; align-items: center; gap: 6px; margin-right: 16px; }
+.hud-energy .orb { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--rain); }
+.hud-energy .orb.full { background: var(--spirit); border-color: var(--spirit); box-shadow: 0 0 6px var(--glow-soft); }
+.hud-energy .cap { margin-left: 4px; font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+/* ========== 道具（占位 SVG + 弱力状态；正式素材为透明 PNG） ========== */
+.prop { position: absolute; transform: translate(-50%, -100%); }
+.prop svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.prop .p-body { fill: var(--gray-struct); stroke: var(--gray-line); stroke-width: 2; stroke-linejoin: round; }
+.prop .p-mid { fill: var(--gray-mid); }
+.prop .p-line { fill: none; stroke: var(--gray-mid); stroke-width: 6; }
+.prop .p-glow { fill: var(--warm-light); }
+.prop.near { filter: drop-shadow(0 0 6px var(--glow-soft)); }
+.prop.working { filter: drop-shadow(0 0 8px var(--glow-soft)); }
+.prop.locked { opacity: 0.55; }
+/* 已完成干预的既定效果（CSS 完成，不额外出图） */
+.prop.done-tip { transform: translate(-50%, -100%) translateX(12px) rotate(96deg); }
+.prop.done-press { transform: translate(-50%, -100%) translateY(3px) scale(0.96); }
+.prop.done-flicker .p-glow { animation: propFlicker 1.1s steps(2, end) infinite; }
+@keyframes propFlicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+
+/* ========== 人物行为改变注释 ========== */
+.scene-note { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); max-width: 640px; padding: 10px 20px; background: var(--panel-veil); border: 1px solid var(--rain); color: var(--text-sub); font-size: 15px; line-height: 1.7; text-align: center; }
+
+/* ========== 事故演出：急刹震屏 / 饭盒滑出 / 人物摔倒 ========== */
+#game.shaking #stage { animation: quake 0.6s linear; }
+@keyframes quake { 0%, 100% { transform: none; } 20% { transform: translate(-6px, 3px); } 40% { transform: translate(5px, -4px); } 60% { transform: translate(-4px, -2px); } 80% { transform: translate(3px, 2px); } }
+.crash-lunchbox { position: absolute; width: 26px; height: 18px; border-radius: 3px; background: var(--warm-light); animation: slideBox 1.4s ease-in forwards; }
+@keyframes slideBox { from { transform: translate(0, 0) rotate(0); } to { transform: translate(180px, 26px) rotate(120deg); } }
+.scene .figure.fallen { transform: translate(-50%, -100%) rotate(84deg) translateY(12px); animation: none; }
+
+/* ========== 右键控制器：时间悬停 · 切换时间线 ========== */
+.controller { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 8; width: 420px; padding: 22px 24px; background: var(--panel-veil); border: 1px solid var(--rain); box-shadow: 0 0 30px var(--shadow); }
+
+/* ---------- 事故链视图（v2 §8：方块 + 直线箭头） ---------- */
+.chain-panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10; width: 1080px; padding: 22px 26px; background: var(--panel-veil); border: 1px solid var(--rain); box-shadow: 0 0 30px var(--shadow); }
+.chain-panel > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.chain-panel > header strong { font-size: 16px; letter-spacing: 3px; color: var(--text-main); }
+.chain-close { padding: 4px 12px; font-size: 16px; }
+.chain-flow { display: flex; align-items: stretch; }
+.chain-node { flex: 1; min-height: 88px; padding: 10px 12px; background: var(--panel); border: 1px solid var(--rain); display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.chain-node .chain-val { font-size: 13px; line-height: 1.7; color: var(--text-sub); }
+.chain-node .chain-cap { display: block; margin-bottom: 6px; font-size: 11px; letter-spacing: 2px; color: var(--text-dim); }
+.chain-node.result .chain-val { color: var(--text-main); font-weight: 500; }
+.chain-node.cut { opacity: 0.35; text-decoration: line-through; }
+.chain-node.unknown { background: var(--lin); border-color: var(--lin); }
+.chain-node.unknown .chain-val { color: var(--bg); font-weight: 500; letter-spacing: 2px; }
+.chain-arrow { flex: 0 0 26px; align-self: center; position: relative; height: 2px; background: var(--rain); }
+.chain-arrow::after { content: ""; position: absolute; right: -6px; top: -3px; border-left: 6px solid var(--rain); border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.chain-note { margin: 16px 0 0; text-align: center; font-size: 13px; letter-spacing: 1px; color: var(--text-dim); }
+/* 命运档案里的入口按钮 */
+button.archive-chain { display: block; margin: 0 22px 6px; width: calc(100% - 44px); padding: 10px 0; }
+.ctrl-title { font-size: 18px; letter-spacing: 3px; color: var(--text-main); }
+.ctrl-tip { margin: 6px 0 14px; font-size: 12px; letter-spacing: 1px; color: var(--text-dim); }
+.ctrl-row { display: flex; align-items: center; gap: 12px; width: 100%; margin-bottom: 10px; padding: 12px 14px; text-align: left; }
+.ctrl-row.current { border-color: var(--spirit); }
+.ctrl-row.disabled { opacity: 0.4; cursor: default; }
+.ctrl-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.ctrl-info { display: flex; flex-direction: column; gap: 2px; }
+.ctrl-info strong { font-size: 15px; font-weight: 500; letter-spacing: 2px; color: var(--text-main); }
+.ctrl-info em { font-style: normal; font-size: 12px; color: var(--text-sub); }
+.ctrl-close { width: 100%; margin-top: 6px; }
+/* 赶路微步由双腿摆动表现（见 .figure.walking .leg） */
+
+/* ========== 通用按钮 ========== */
+button { border: 1px solid var(--gray-struct); border-radius: 3px; padding: 9px 18px; background: var(--btn); color: var(--text-main); cursor: pointer; font: inherit; }
+/* 悬停背景只给真正的 UI 按钮，避免污染人物/线索这类“场景内按钮” */
+#hud button:hover, #archive button:hover, .end-box button:hover { background: var(--btn-hover); }
+/* 焦点反馈统一用柔和辉光，不用方形描边（避免“桌面图标选中框”观感） */
+button:focus-visible { outline: none; box-shadow: 0 0 10px var(--glow-soft); }
